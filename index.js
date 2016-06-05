@@ -44,15 +44,19 @@ module.exports = function(req, res, done){
 		
 		if('string' == typeof data){
 			fs.stat(data, function(err, stat){
-				assert(!err, 'Get File stat error');
+				if(err){
+					res.statusCode = 404;
+					res.end('');
+					return;
+				}
 				
-				res.setHeader('content-length', stat.size);
+				// res.setHeader('content-length', stat.size);
 				var frs = options.range ? fs.createReadStream(data, options.range) : fs.createReadStream(data);
 				
 				if(options.range){
 					res.setHeader('content-range', '' + (options.range.start || '0') + '-' + (options.range.end || stat.size) + '/' + stat.size);
 					res.statusCode = 206;
-					res.setHeader('content-length', '' + (options.range.end || stat.size) - (options.range.start || 0));
+					// res.setHeader('content-length', '' + (options.range.end || stat.size) - (options.range.start || 0));
 				}
 				
 				if(options.encoding){
@@ -71,12 +75,12 @@ module.exports = function(req, res, done){
 				}
 			});
 		}else{
-			res.setHeader('content-length', data.length);
+			// res.setHeader('content-length', data.length);
 			if('object' == typeof options.range){
 				res.setHeader('content-range', '' + (options.range.start || '0') + '-' + (options.range.end || data.length) + '/' + data.length);
 				data = data.slice(options.range.start || 0, options.range.end || data.length);
 				res.statusCode = 206;
-				res.setHeader('content-length', '' + (options.range.end || data.length) - (options.range.start || 0))
+				// res.setHeader('content-length', '' + (options.range.end || data.length) - (options.range.start || 0))
 			}
 			
 			if('string' == typeof options.encoding){
